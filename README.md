@@ -14,11 +14,14 @@ A列用来做ID，必须是string或者int格式。必须包含一个data 的 sh
 第一行是只做注释用，第二行是key得名字，第三行是value得类型，第五行开始才是每一列得值。
 
 值类型：
-int: 整数。
 
-string: 文本。
+`int`: 整数。
 
-float: 小数。
+`string`: 文本。
+
+`float`: 小数。
+
+`bool`： 布尔值
 
 array[int,string,float,bool]:数组,会自动生成 {[1] = x, [2] = y, [3] = z} 这种格式。
 
