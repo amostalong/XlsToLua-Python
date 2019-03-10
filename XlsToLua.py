@@ -320,9 +320,9 @@ for parent,dirnames,filenames in os.walk("."):
                     if ok == True:
 
                         if newfoloder == True:    
-                            fileOutput = open('./' + dirName + '/' + fileName + '.lua.txt', 'w', encoding='utf-8')
+                            fileOutput = open('./' + dirName + '/' + fileName + 'Data.lua.txt', 'w', encoding='utf-8')
                         else:
-                            fileOutput = open('./' + fileName + '.lua.txt', 'w', encoding='utf-8')
+                            fileOutput = open('./' + fileName + 'Data.lua.txt', 'w', encoding='utf-8')
 
                         #print('writeData: ' + writeData)
                         fileOutput.write(writeData)
