@@ -46,3 +46,11 @@ table:自由格式，完全由策划自己去配置，会直接复制到lua配�
 在excel 的 单元格中为： { A = 100, B = { [1] = 'A', [2] = 2 } }
 
 emmylua注释： 这个python脚本也会生产对应的emmylua格式的类型说明（table不会生产，没有去解析table内部，可能以后会去弄）
+
+参数:
+
+1. `-sh:` 必须参数后面接目标sheet的名字
+2. `-fd:` 可选,当使用时会用生成时间建立一个新的文件夹
+
+例如:python XlsToLua.py -sh data test -fd
+表明目标: sheet = ['data','test'],folder = true

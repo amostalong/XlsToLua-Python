@@ -1,25 +1,28 @@
+#!/usr/bin/python3
+
 import xlrd
 import sys
 import os
 import re
 import datetime
 import time
+import getopt
+import argparse
 
 today = datetime.date.today
 now = time.strftime("%H:%M:%S")
 dirName = time.strftime("%Y%m%d-%H%M%S", time.localtime())
 
+header = False
+
 print('dn: ' + dirName)
-os.makedirs('./' + dirName)
 
 fileError = False
-
 
 dataStartRow = 4
 dataNameRow = 1
 dataTypeRow = 2
 
-targetSheetName = 'data'
 indent = 0
 
 def line(strs):
@@ -28,7 +31,7 @@ def line(strs):
 writeData = line('---@')
 
 annotaionData = line('')
-annotaionData = line('--- 注释')
+
 
 luaRequirefileName = 'LuaDataRequire.lua.txt'
 luaRequireData = line('--- require')
@@ -80,6 +83,8 @@ def SheetParseIdx(booksheet, row):
 
     ShowIndent()
     if dataType == 'string':
+        writeData += '{idx} = '.format(idx = str(booksheet.cell(row, 0).value))
+        writeData += '{\n'
         return True
     elif dataType == 'int':
 
@@ -209,26 +214,29 @@ def SheetParse(fileName, booksheet):
     global annotaionData
     global fileError
     global luaRequireData
+    global cursheet
+    global newfoloder
+    global header
 
     fileError = False
-    annotaionData = ''
-    writeData = ''
-
-
     
-    for col in range(booksheet.ncols):
-        writeData += '--- '
-        writeData += str(booksheet.cell(0,col).value) + '\t\t'
-        writeData += str(booksheet.cell(1,col).value) + '\t\t'
-        writeData += str(booksheet.cell(2,col).value) + '\n'
+    if header == False:
+        for col in range(booksheet.ncols):
+            writeData += '--- '
+            writeData += str(booksheet.cell(0,col).value) + '\t\t'
+            writeData += str(booksheet.cell(1,col).value) + '\t\t'
+            writeData += str(booksheet.cell(2,col).value) + '\n'
+ 
     
     writeData += line('')
-    writeData += line(fileName  + "Data  = {}")
-    writeData += line(fileName  + "Data.d = {")
+    if header == False:
+        writeData += line(fileName  + "Data  = {}")
+    writeData += line(fileName  + "Data." + cursheet + " = {")
+
     annotaionData += line('---@class ' + fileName  + "Data")
-    annotaionData += line('---@field d ' + fileName + "DataIns" )
+    annotaionData += line('---@field ' + cursheet + "DataIns" )
     annotaionData += line('')
-    annotaionData += line('---@class ' + fileName + "DataIns" )
+    annotaionData += line('---@class ' + cursheet + "DataIns" )
 
     AddIndent(1)
 
@@ -244,18 +252,34 @@ def SheetParse(fileName, booksheet):
 
     writeData += '}\n'
     writeData += annotaionData
+    annotaionData = ''
 
-    if fileError == False:    
-        fileOutput = open('./' + dirName + '/' + fileName + 'Data.lua.txt', 'w')
-        fileOutput.write(writeData)
-        luaRequireData += line("require('LuaData." + fileName + "Data')")
-    else:
-        fileOutput = open('./' + dirName + '/' + fileName + 'Data.出错啦兄弟', 'w')
-
+    AddIndent(-1)
+    header = True
     return not fileError
 
+#设置参数
+parser  = argparse.ArgumentParser()
+parser .add_argument("-sh", "--sheet", dest = 'sheet', required = True, nargs='*', help= "parse sheet name")
+parser .add_argument("-fd", "--folder", dest = 'folder', help= "create new folder", action = 'store_true')
 
+args = parser .parse_args()
 
+global targetSheetName
+global newfoloder
+global cursheet
+dirName
+
+print('args.sheet = {sheet}'.format(sheet = args.sheet))
+targetSheetName = args.sheet
+
+print('args.folder = {folder}'.format(folder = args.folder))
+newfoloder = args.folder
+
+ok = False
+
+if newfoloder == True:
+    os.makedirs('./' + dirName)
 
 for parent,dirnames,filenames in os.walk("."):
 
@@ -277,22 +301,51 @@ for parent,dirnames,filenames in os.walk("."):
 
             for booksheet in workbook.sheets():
 
-                if booksheet.name == targetSheetName: 
-                    print ('找到 -> {target} <- sheet ..'.format(target = targetSheetName))
+                #print (line('发现一个sheet: ' + booksheet.name))
+                if booksheet.name in targetSheetName: 
+
+                    cursheet = booksheet.name
+
+                    print ('找到 -> {target} <- sheet ..'.format(target = cursheet))
+
                     finddatasheet = True
-                    res = SheetParse(portion[0], booksheet)
 
-                    if res == False:
-                        print ('当前 xls 生成失败.\n')
-                        break
+                    ok = SheetParse(portion[0], booksheet)
 
+                    fileName = portion[0]
             else:
                 if finddatasheet:
-                    print ('当前 xls 生成结束.\n')
-                    fileOutput = open('./' + dirName + '/' + luaRequirefileName, 'w')
+                    print ('解析完成开始,开始分析结果.\n')
+
+                    if ok == True:
+
+                        if newfoloder == True:    
+                            fileOutput = open('./' + dirName + '/' + fileName + '.lua.txt', 'w', encoding='utf-8')
+                        else:
+                            fileOutput = open('./' + fileName + '.lua.txt', 'w', encoding='utf-8')
+
+                        print('writeData: ' + writeData)
+                        fileOutput.write(writeData)
+                        luaRequireData += line("require('LuaData." + fileName + "Data')")
+                    else:
+                        fileOutput = open('./' + dirName + '/' + fileName + 'Data.出错啦兄弟', 'w', encoding='utf-8')
+
+                    if ok == False:
+                        print ('当前 xls 生成失败.\n')
+                        break
+                    
+                    if newfoloder == True:
+                        fileOutput = open('./' + dirName + '/' + luaRequirefileName, 'w', encoding='utf-8')
+                    else:
+                        fileOutput = open('./' + luaRequirefileName, 'w', encoding='utf-8')
+
                     fileOutput.write(luaRequireData)
                 else:
                     print ('没有找到 --> {target} <- sheet！生成失败..\n'.format(target = targetSheetName))
+    else:
+        writeData = ''
+        annotaionData = ''
+
 
 
 

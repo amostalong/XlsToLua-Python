@@ -1,5 +1,4 @@
 @echo off 
-C:
-cmd /k python XlsToLua.py
+cmd /k python XlsToLua.py -sh data test -fd
 pause
 exit
