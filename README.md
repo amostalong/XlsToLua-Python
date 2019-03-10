@@ -52,5 +52,5 @@ emmylua注释： 这个python脚本也会生产对应的emmylua格式的类型�
 1. `-sh:` 必须参数后面接目标sheet的名字
 2. `-fd:` 可选,当使用时会用生成时间建立一个新的文件夹
 
-例如:python XlsToLua.py -sh data test -fd
+例如:`python XlsToLua.py -sh data test -fd`
 表明目标: sheet = ['data','test'],folder = true
