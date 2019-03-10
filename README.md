@@ -8,7 +8,9 @@
 
 3.windows使用bat可以自己生产，生产的结果会存储在当前目录下的一个以时间为名字的文件夹中
 
-4.excel格式：
+4.多sheet处理: 支持一个xls中的多个sheet, 每一个目标sheet都会被生成为一个table
+
+5.excel格式：
 
 A列用来做ID，必须是string或者int格式。必须包含一个data 的 sheet。
 第一行是只做注释用，第二行是key得名字，第三行是value得类型，第五行开始才是每一列得值。
