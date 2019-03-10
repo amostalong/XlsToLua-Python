@@ -324,7 +324,7 @@ for parent,dirnames,filenames in os.walk("."):
                         else:
                             fileOutput = open('./' + fileName + '.lua.txt', 'w', encoding='utf-8')
 
-                        print('writeData: ' + writeData)
+                        #print('writeData: ' + writeData)
                         fileOutput.write(writeData)
                         luaRequireData += line("require('LuaData." + fileName + "Data')")
                     else:
@@ -340,11 +340,18 @@ for parent,dirnames,filenames in os.walk("."):
                         fileOutput = open('./' + luaRequirefileName, 'w', encoding='utf-8')
 
                     fileOutput.write(luaRequireData)
+
+                    writeData = ''
+                    annotaionData = ''
+
+                    header = False
                 else:
                     print ('没有找到 --> {target} <- sheet！生成失败..\n'.format(target = targetSheetName))
-    else:
-        writeData = ''
-        annotaionData = ''
+
+                    writeData = ''
+                    annotaionData = ''
+                    header = False
+
 
 
 
